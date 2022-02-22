@@ -1,0 +1,33 @@
+version: '3.7'
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    environment:
+      - DEBUG=1
+      - SERVICES=dynamodb,s3, lambda     
+      - AWS_DEFAULT_OUTPUT=json 
+      - AWS_DEFAULT_REGION=us-east-1      
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock      
+    ports:
+      - "4566:4566"
+      - "4571:4571"    
+    volumes:
+      - localstack_data:/tmp/localstack/data
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    ports:
+      - "8001:8001"
+    environment:
+      DYNAMO_ENDPOINT: "http://localstack:4566"
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local
+      AWS_SECRET_ACCESS_KEY: local
+    depends_on:
+      - localstack
+
+volumes:
+  localstack_data:
